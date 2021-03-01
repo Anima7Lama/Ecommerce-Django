@@ -1,5 +1,8 @@
 from django.db import models
 STATUS = (('in', 'In Stock'),('out', 'Out Of Stock')) #create tuple inside tuple for choices
+LABEL = (('new', 'New Product'),('hot', 'Hot Product'),('sales', 'Product in sale'))
+
+from django.urls import reverse
 
 # Create your models here.
 class Category(models.Model):
@@ -9,6 +12,9 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name #show the category name instead of category id
+    
+    def get_category_url(self):
+        return reverse("home:category", kwargs={'slug':self.slug})
 
 class Slider(models.Model):
     name = models.CharField(max_length=300)
@@ -45,7 +51,11 @@ class Item(models.Model):
     category = models.ForeignKey(Category, on_delete = models.CASCADE)
     brand = models.ForeignKey(Brand, on_delete = models.CASCADE)
     status = models.CharField(max_length=50, choices = STATUS)
-    
+    label = models.CharField(max_length=50, choices = LABEL, default='new')
+    image = models.TextField(blank=True)
+
     def __str__(self):
         return self.title
 
+    def get_url(self):
+        return reverse("home:product-detail", kwargs={'slug':self.slug}) #if you want to pass ceratin dictionary to another page

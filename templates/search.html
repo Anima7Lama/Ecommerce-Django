@@ -21,6 +21,7 @@
                     <div class="col-lg-8">
                         <div class="row">
                             <div class="col-md-12">
+                                <p><center>You searched for {{searched_for}}</center></p>
                                 <div class="product-view-top">
                                     <div class="row">
                                         <div class="col-md-4">
@@ -64,11 +65,11 @@
                                 </div>
                             </div>
 
-                            {% for prodList in productLists %}
+                            {% for search in search_query %}
                             <div class="col-md-4">
-                                <div class="product-item">
+                                <div class="product-item" style="width:280px;height:280px;">
                                     <div class="product-title">
-                                        <a href="#">{{prodList.title}}</a>
+                                        <a href="{{search.get_url}}">{{search.title}}</a>
                                         <div class="ratting">
                                             <i class="fa fa-star"></i>
                                             <i class="fa fa-star"></i>
@@ -78,8 +79,8 @@
                                         </div>
                                     </div>
                                     <div class="product-image">
-                                        <a href="product-detail.html">
-                                            <img src="{{prodList.image}}" alt="Product Image" style="width:300px;height:300px;">
+                                        <a href="{{search.get_url}}">
+                                            <img src="{{search.image}}" alt="Product Image" style="width:280px;height:280px;">
                                         </a>
                                         <div class="product-action">
                                             <a href="#"><i class="fa fa-cart-plus"></i></a>
@@ -88,7 +89,11 @@
                                         </div>
                                     </div>
                                     <div class="product-price">
-                                        <h3><span>$</span>{{prodList.price}}</h3>
+                                        {% if search.discounted_price > 0%}
+                                        <h3><span>$</span>{{search.discounted_price}}</h3>
+                                        {% else %}
+                                        <h3><span>$</span>{{search.price}}</h3>
+                                        {% endif %}
                                         <a class="btn" href=""><i class="fa fa-shopping-cart"></i>Buy Now</a>
                                     </div>
                                 </div>

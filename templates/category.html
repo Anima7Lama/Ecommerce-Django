@@ -64,11 +64,11 @@
                                 </div>
                             </div>
 
-                            {% for prodList in productLists %}
+                            {% for item in category_items %}
                             <div class="col-md-4">
                                 <div class="product-item">
                                     <div class="product-title">
-                                        <a href="#">{{prodList.title}}</a>
+                                        <a href="{{item.get_url}}">{{item.title}}</a>
                                         <div class="ratting">
                                             <i class="fa fa-star"></i>
                                             <i class="fa fa-star"></i>
@@ -78,8 +78,8 @@
                                         </div>
                                     </div>
                                     <div class="product-image">
-                                        <a href="product-detail.html">
-                                            <img src="{{prodList.image}}" alt="Product Image" style="width:300px;height:300px;">
+                                        <a href="{{item.get_url}}">
+                                            <img src="{{item.image}}" alt="Product Image" style="width:300px;height:300px;">
                                         </a>
                                         <div class="product-action">
                                             <a href="#"><i class="fa fa-cart-plus"></i></a>
@@ -88,7 +88,11 @@
                                         </div>
                                     </div>
                                     <div class="product-price">
-                                        <h3><span>$</span>{{prodList.price}}</h3>
+                                        {% if item.discounted_price > 0 %}
+                                        <h3><span>$</span>{{item.discounted_price}}</h3>
+                                        {% else %}
+                                        <h3><span>$</span>{{item.price}}</h3>
+                                        {% endif %}
                                         <a class="btn" href=""><i class="fa fa-shopping-cart"></i>Buy Now</a>
                                     </div>
                                 </div>
@@ -120,47 +124,14 @@
                         <div class="sidebar-widget category">
                             <h2 class="title">Category</h2>
                             <nav class="navbar bg-light">
-                                {% for category in categories %}
                                 <ul class="navbar-nav">
+                                    {% for category in categories %}
                                     <li class="nav-item">
                                         <a class="nav-link" href="#"><i class="fa fa-{{category.image}}"></i>{{category.name}}</a>
                                     </li>
+                                    {% endfor %}
                                 </ul>
-                                {% endfor %}
                             </nav>
-                        </div>
-                        
-                        <div class="sidebar-widget widget-slider">
-                            <div class="sidebar-slider normal-slider">
-                                {% for slideList in productLists %}
-                                <div class="product-item">
-                                    <div class="product-title">
-                                        <a href="#">{{slideList.title}}</a>
-                                        <div class="ratting">
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                        </div>
-                                    </div>
-                                    <div class="product-image">
-                                        <a href="product-detail.html">
-                                            <img src="{{slideList.image}}" alt="Product Image" style="width:300px;height:300px;">
-                                        </a>
-                                        <div class="product-action">
-                                            <a href="#"><i class="fa fa-cart-plus"></i></a>
-                                            <a href="#"><i class="fa fa-heart"></i></a>
-                                            <a href="#"><i class="fa fa-search"></i></a>
-                                        </div>
-                                    </div>
-                                    <div class="product-price">
-                                        <h3><span>$</span>{{slideList.price}}</h3>
-                                        <a class="btn" href=""><i class="fa fa-shopping-cart"></i>Buy Now</a>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
                         </div>
 
                         <div class="sidebar-widget brands">
