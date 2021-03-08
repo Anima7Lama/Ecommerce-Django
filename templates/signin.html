@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}  
+        
+        <!-- Breadcrumb Start -->
+        <div class="breadcrumb-wrap">
+            <div class="container-fluid">
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item"><a href="#">Products</a></li>
+                    <li class="breadcrumb-item active">Login</li>
+                </ul>
+            </div>
+        </div>
+        <!-- Breadcrumb End -->
+        
+        <!-- Login Start -->
+        <div class="login">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="login-form" style="background: #5F9EA0; padding-bottom:15px; margin-top: 30px;">
+                            <form method="POST">
+                                {% csrf_token %}
+                                {% for message in messages %}
+                                <h3 style="text-align: center;">{{message}}</h3>
+                                {% endfor %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label>E-mail / Username</label>
+                                        <input name="username" class="form-control" type="text" placeholder="E-mail / Username">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Password</label>
+                                        <input name="password" class="form-control" type="password" placeholder="Password">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="newaccount">
+                                            <label class="custom-control-label" for="newaccount">Keep me signed in</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" style="padding-top: 25px;">
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn" style="background-color: #2F4F4F;width: 150px;">SUBMIT</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Login End -->
+        
+ {% endblock %}

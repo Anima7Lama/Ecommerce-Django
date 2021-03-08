@@ -15,7 +15,7 @@
         <!-- Breadcrumb End -->
         
         <!-- Product Detail Start -->
-        {% for item in item_detail %}
+        {% for item in item_detail.all %}
         <div class="product-detail">
             <div class="container-fluid">
                 <div class="row">
@@ -57,6 +57,7 @@
                                                 <button type="button" class="btn">XL</button>
                                             </div> 
                                         </div>
+                                        {% if item.category.name == 'Mandala' %}
                                         <div class="p-color">
                                             <h4>Color:</h4>
                                             <div class="btn-group btn-group-sm">
@@ -65,9 +66,10 @@
                                                 <button type="button" class="btn">Blue</button>
                                             </div> 
                                         </div>
+                                        {% endif %}
                                         <div class="action">
-                                            <a class="btn" href="#"><i class="fa fa-shopping-cart"></i>Add to Cart</a>
-                                            <a class="btn" href="#"><i class="fa fa-shopping-bag"></i>Buy Now</a>
+                                            <a class="btn" href="{{item.get_cart_url}}"><i class="fa fa-shopping-cart"></i>Add to Cart</a>
+                                            <a class="btn" href="{{item.get_cart_url}}"><i class="fa fa-shopping-bag"></i>Buy Now</a>
                                         </div>
                                     </div>
                                 </div>
@@ -156,7 +158,7 @@
                             <div class="row align-items-center product-slider product-slider-3">
                                 {% for item in related_items %}
                                 <div class="col-lg-3">
-                                    <div class="product-item" style="width: 250px;height: 300px;">
+                                    <div class="product-item">
                                         <div class="product-title">
                                             <a href="{{item.get_url}}">{{item.title}}</a>
                             
@@ -166,7 +168,7 @@
                                                 <img src="{{item.image}}" alt="Product Image" style="height: 250px;width: 250px;">
                                             </a>
                                             <div class="product-action">
-                                                <a href="#"><i class="fa fa-cart-plus"></i></a>
+                                                <a href="{{item.get_cart_url}}"><i class="fa fa-cart-plus"></i></a>
                                                 <a href="#"><i class="fa fa-heart"></i></a>
                                                 <a href="#"><i class="fa fa-search"></i></a>
                                             </div>
@@ -177,7 +179,7 @@
                                             {% else %}
                                             <h3><span>$</span>{{item.price}}</h3>
                                             {% endif %}
-                                            <a class="btn" href=""><i class="fa fa-shopping-cart"></i>Buy Now</a>
+                                            <a class="btn" href="{{item.get_cart_url}}"><i class="fa fa-shopping-cart"></i>Buy Now</a>
                                         </div>
                                     </div>
                                 </div>
@@ -194,7 +196,7 @@
                                 <ul class="navbar-nav">
                                     {% for category in categories %}
                                     <li class="nav-item">
-                                        <a class="nav-link" href="#"><i class="fa fa-{{category.image}}"></i>{{category.name}}</a>
+                                        <a class="nav-link" href="#"><i class="fa fa-{{category.image}} fa-rotate-270 fa-fw"></i>{{category.name}}</a>
                                     </li>
                                     {% endfor %}
                                 </ul>
@@ -207,7 +209,7 @@
                             <h2 class="title">Our Brands</h2>
                             <ul>
                                 {% for brand in brands %}
-                                <li><a href="#">{{brand.name}}</a><span>(45)</span></li>
+                                <li><a href="{{brand.get_brand_url}}">{{brand.name}}</a><span>(45)</span></li>
                                 {% endfor %}
                             </ul>
                         </div>
