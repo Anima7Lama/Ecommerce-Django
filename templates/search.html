@@ -6,7 +6,7 @@
         <div class="breadcrumb-wrap">
             <div class="container-fluid">
                 <ul class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
                     <li class="breadcrumb-item"><a href="#">Products</a></li>
                     <li class="breadcrumb-item active">Product List</li>
                 </ul>
@@ -79,7 +79,7 @@
                                     </div>
                                     <div class="product-image">
                                         <a href="{{search.get_url}}">
-                                            <img src="{{search.image}}" alt="Product Image">
+                                            <img src="{{search.image.url}}" alt="Product Image" style="height: 250px;width: 250px;">
                                         </a>
                                         <div class="product-action">
                                             <a href="#"><i class="fa fa-cart-plus"></i></a>
@@ -89,10 +89,10 @@
                                     </div>
                                     <div class="product-price">
                                        {% if new.discounted_price > 0 %}
-                                <h3><span>$</span>{{new.discounted_price}}</h3>
-                                {% else %}
-                                <h3><span>$</span>{{new.price}}</h3>
-                                {% endif %}
+                                        <h3><span>$</span>{{new.discounted_price}}</h3>
+                                        {% else %}
+                                        <h3><span>$</span>{{new.price}}</h3>
+                                        {% endif %}
                                         <a class="btn" href=""><i class="fa fa-shopping-cart"></i>Buy Now</a>
                                     </div>
                                 </div>
@@ -134,7 +134,7 @@
                             </nav>
                         </div>
 
-                        
+<!--                         
 
                         <div class="sidebar-widget brands">
                             <h2 class="title">Our Brands</h2>
@@ -143,7 +143,7 @@
                                 <li><a href="{{brand.get_brand_url}}">{{brand.name}}</a><span>(45)</span></li>
                                 {% endfor %}
                             </ul>
-                        </div>
+                        </div> -->
 
                         <div class="sidebar-widget tag">
                             <h2 class="title">Tags Cloud</h2>
@@ -166,8 +166,8 @@
             </div>
         </div>
         <!-- Product List End -->
-
-        <!-- Brand Start -->
+<!-- 
+         Brand Start 
         <div class="brand">
             <div class="container-fluid">
                 <div class="brand-slider">
@@ -180,7 +180,7 @@
                 </div>
             </div>
         </div>
-        <!-- Brand End -->
+        Brand End -->
 
         <!-- Footer Start -->
 {% endblock %}

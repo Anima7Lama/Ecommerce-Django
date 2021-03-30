@@ -38,7 +38,7 @@
                                         <tr>
                                             <td>
                                                 <div class="img">
-                                                    <a href="{{cart.item.get_url}}"><img src="{{cart.item.image}}" alt="Image"></a>
+                                                    <a href="{{cart.item.get_url}}"><img src="{{cart.item.image.url}}" alt="Image"></a>
                                                     <p>{{cart.item.title}}</p>
                                                 </div>
                                             </td>
@@ -76,11 +76,12 @@
                                         <button>Apply Code</button>
                                     </div>
                                 </div>
+                                {% for total in Total.all %}
                                 <div class="col-md-12">
                                     <div class="cart-summary">
                                         <div class="cart-content">
                                             <h1>Cart Summary</h1>
-                                            <p>Sub Total<span>$99</span></p>
+                                            <p>Sub Total<span>{{total.get_cart_total}}</span></p>
                                             <p>Shipping Cost<span>$1</span></p>
                                             <h2>Grand Total<span>$100</span></h2>
                                         </div>
@@ -89,7 +90,9 @@
                                             <button>Checkout</button>
                                         </div>
                                     </div>
+                                    
                                 </div>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>

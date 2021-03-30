@@ -6,8 +6,8 @@
         <div class="breadcrumb-wrap">
             <div class="container-fluid">
                 <ul class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="#">Home</a></li>
-                    <li class="breadcrumb-item"><a href="#">Products</a></li>
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/product-list">Products</a></li>
                     <li class="breadcrumb-item active">Product List</li>
                 </ul>
             </div>
@@ -24,10 +24,12 @@
                                 <div class="product-view-top">
                                     <div class="row">
                                         <div class="col-md-4">
-                                            <div class="product-search">
-                                                <input type="email" value="Search">
-                                                <button><i class="fa fa-search"></i></button>
-                                            </div>
+                                            <form method="GET" action="{% url 'home:search' %}">
+                                                <div class="product-search">
+                                                    <input name="query" type="text" value="Search">
+                                                    <button><i class="fa fa-search"></i></button>
+                                                </div>
+                                            </form>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="product-short">
@@ -79,7 +81,7 @@
                                     </div>
                                     <div class="product-image">
                                         <a href="{{item.get_url}}">
-                                            <img src="{{item.image}}" alt="Product Image" style="width:300px;height:300px;">
+                                            <img src="{{item.image.url}}" alt="Product Image" style="height: 250px;width: 250px;">
                                         </a>
                                         <div class="product-action">
                                             <a href="#"><i class="fa fa-cart-plus"></i></a>
@@ -97,7 +99,8 @@
                                     </div>
                                 </div>
                             </div>
-                            {% endfor %}    
+                            {% endfor %}   
+                        </div> 
                         
                         <!-- Pagination Start -->
                         <div class="col-md-12">
@@ -134,7 +137,7 @@
                             </nav>
                         </div>
 
-                        <div class="sidebar-widget brands">
+                        <!-- <div class="sidebar-widget brands">
                             <h2 class="title">Our Brands</h2>
                             <ul>
                                 <li><a href="#">Nulla </a><span>(45)</span></li>
@@ -144,7 +147,7 @@
                                 <li><a href="#">Fusce </a><span>(89)</span></li>
                                 <li><a href="#">Sagittis</a><span>(28)</span></li>
                             </ul>
-                        </div>
+                        </div> -->
                         
                         <div class="sidebar-widget tag">
                             <h2 class="title">Tags Cloud</h2>
@@ -169,7 +172,7 @@
         <!-- Product List End -->  
         
         <!-- Brand Start -->
-        <div class="brand">
+        <!-- <div class="brand">
             <div class="container-fluid">
                 <div class="brand-slider">
                     <div class="brand-item"><img src="{% static 'img/brand-1.png' %}" alt=""></div>
@@ -180,7 +183,7 @@
                     <div class="brand-item"><img src="{% static 'img/brand-6.png' %}" alt=""></div>
                 </div>
             </div>
-        </div>
+        </div> -->
         <!-- Brand End -->
         
  {% endblock %}

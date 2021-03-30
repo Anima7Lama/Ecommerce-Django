@@ -6,8 +6,7 @@
         <div class="breadcrumb-wrap">
             <div class="container-fluid">
                 <ul class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="#">Home</a></li>
-                    <li class="breadcrumb-item"><a href="#">Products</a></li>
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
                     <li class="breadcrumb-item active">Contact</li>
                 </ul>
             </div>
@@ -17,6 +16,9 @@
         <!-- Contact Start -->
         <div class="contact">
             <div class="container-fluid">
+                {% for message in messages %}
+                <center>{{message}}</center>
+                {% endfor %}
                 <div class="row">
                     <div class="col-lg-4">
                         <div class="contact-info">
@@ -33,22 +35,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4">
-                        <div class="contact-info">
-                            <h2>Our Store</h2>
-                            <h3><i class="fa fa-map-marker"></i>123 Store, Los Angeles, CA, USA</h3>
-                            <h3><i class="fa fa-envelope"></i>store@example.com</h3>
-                            <h3><i class="fa fa-phone"></i>+123-456-7890</h3>
-                            <div class="social">
-                                <a href=""><i class="fab fa-twitter"></i></a>
-                                <a href=""><i class="fab fa-facebook-f"></i></a>
-                                <a href=""><i class="fab fa-linkedin-in"></i></a>
-                                <a href=""><i class="fab fa-instagram"></i></a>
-                                <a href=""><i class="fab fa-youtube"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
+                    
+                    <div class="col-lg-8">
                         <div class="contact-form">
                             <form method="POST">
                                 {% csrf_token %}

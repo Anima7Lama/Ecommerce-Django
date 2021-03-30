@@ -1,4 +1,16 @@
+anytree==2.8.0
 asgiref==3.3.1
 Django==3.1.7
+django-admin-csvexport==1.8
+django-ckeditor==6.0.0
+django-csv-exports==1.0.5
+django-filter==2.4.0
+django-js-asset==1.2.2
+djangorestframework==3.12.2
+numpy==1.20.1
+pandas==1.2.3
+Pillow==8.1.2
+python-dateutil==2.8.1
 pytz==2021.1
+six==1.15.0
 sqlparse==0.4.1

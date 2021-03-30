@@ -6,8 +6,8 @@
         <div class="breadcrumb-wrap">
             <div class="container-fluid">
                 <ul class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="#">Home</a></li>
-                    <li class="breadcrumb-item"><a href="#">Products</a></li>
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/product-list">Products</a></li>
                     <li class="breadcrumb-item active">Product Detail</li>
                 </ul>
             </div>
@@ -24,7 +24,7 @@
                             <div class="row align-items-center">
                                 <div class="col-md-5">
                                     <div class="product-slider-single normal-slider">
-                                        <img src="{{item.image}}" alt="Product Image" style="width: 233px;height: 350px;">
+                                        <img src="{{item.image.url}}" alt="Product Image" style="width: 233px;height: 350px;">
                                     </div>
                                   
                                 </div>
@@ -94,7 +94,8 @@
                                     <div id="description" class="container tab-pane active">
                                         <h4>Product description</h4>
                                         <p>
-                                            {{item.description}}
+                                            <!-- safe = bcs if not included html is not gonna work -->
+                                            {{item.description | safe}} 
                                         </p>
                                     </div>
                                     <div id="specification" class="container tab-pane fade">
@@ -165,7 +166,7 @@
                                         </div>
                                         <div class="product-image">
                                             <a href="{{item.get_url}}">
-                                                <img src="{{item.image}}" alt="Product Image" style="height: 250px;width: 250px;">
+                                                <img src="{{item.image.url}}" alt="Product Image" style="height: 250px;width: 250px;">
                                             </a>
                                             <div class="product-action">
                                                 <a href="{{item.get_cart_url}}"><i class="fa fa-cart-plus"></i></a>
@@ -201,10 +202,8 @@
                                     {% endfor %}
                                 </ul>
                             </nav>
-                        </div>
-                        
-                        
-                        
+                        </div> 
+<!--                         
                         <div class="sidebar-widget brands">
                             <h2 class="title">Our Brands</h2>
                             <ul>
@@ -212,7 +211,7 @@
                                 <li><a href="{{brand.get_brand_url}}">{{brand.name}}</a><span>(45)</span></li>
                                 {% endfor %}
                             </ul>
-                        </div>
+                        </div> -->
                         
                         <div class="sidebar-widget tag">
                             <h2 class="title">Tags Cloud</h2>

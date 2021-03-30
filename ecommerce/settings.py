@@ -39,6 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'home',
+    'csvexport', #csv package
+    'rest_framework',
+    'django_filters',
+    'ckeditor',
 ]
 
 MIDDLEWARE = [
@@ -120,6 +124,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_URL = 'media/'  #for image
 
 #This tells Django where to look for static files that are not tied to a particular app.
 STATICFILES_DIRS = (
@@ -128,5 +133,43 @@ STATICFILES_DIRS = (
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+#way 1
+# host: 'smtp.gmail.com'
+# port: 587 #default
+# username: 'taeanee101@gmail.com'
+# password: 'bangtanlove$3'
+# use_tls: True #EMAIL_USE_TLS
+# use_ssl: False #EMAIL_USE_SSL
+# timeout: EMAIL_TIMEOUT
+# ssl_keyfile: EMAIL_SSL_KEYFILE
+# ssl_certfile: EMAIL_SSL_CERTFILE
+
+# way 2
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587 #default
+EMAIL_HOST_USER = 'taeanee101@gmail.com'
+EMAIL_HOST_PASSWORD = 'bangtanlove$3'
+EMAIL_USE_TLS = True #secure
+EMAIL_USE_SSL = False #local host not secure
+
+#csv configuration
+CSV_EXPORT_REFERENCE_DEPTH = 3
+CSV_EXPORT_EMPTY_VALUE = ''
+
+# The default value is False. It determines if the library will use database transactions on data import, 
+# just to be on the safe side.
+IMPORT_EXPORT_USE_TRANSACTIONS = True
+
+CSV_EXPORT_DELIMITER = ','
+CSV_EXPORT_ESCAPECHAR = ''
+CSV_EXPORT_QUOTECHAR = '"'
+CSV_EXPORT_DOUBLEQUOTE = True
+CSV_EXPORT_LINETERMINATOR = r'\n'
+CSV_EXPORT_QUOTING = 'QUOTE_ALL'
+CSV_EXPORT_FORMAT_FORM = True

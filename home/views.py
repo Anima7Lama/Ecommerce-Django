@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect
-from .models import Category, Slider, Ad, Brand, Item, Cart
+from .models import Category, Slider, Ad, Item, Customer, OrderItem, Order, ShippingAddress, Contact
 
 # Create your views here.
 from django.views.generic.base import View
 
 from django.contrib.auth.models import User
 from django.contrib import messages,auth
+
+from django.core.mail import EmailMultiAlternatives #for email
 
 #Class based view
 class BaseView(View):   #BaseView(View) = classname(View class inherited form django)
@@ -39,7 +41,7 @@ class productDetailView(BaseView):
         self.views['related_items'] = Item.objects.filter(category=category)
         self.views['item_detail'] = Item.objects.filter(slug = slug)
         self.views['categories'] = Category.objects.all()
-        self.views['brands'] = Brand.objects.all()
+        # self.views['brands'] = Brand.objects.all()
         return render(request, 'product-detail.html',self.views)
 
 class searchView(BaseView):
@@ -100,34 +102,49 @@ def login(request):
         password = request.POST['password']
 
         user = auth.authenticate(username = username, password = password)
+        
         if user is None:
             messages.error(request, 'Username and password didnot match')
             return redirect('home:signin')
         else:
             auth.login(request,user)
-            return redirect('/')
-            
+            if user.is_superuser:
+                return redirect('/admin')  
+            else:
+                return redirect('/')
+        
     return render(request, 'signin.html')
 
 class cartView(BaseView):
     def get(self, request):
-        self.views['carts'] = Cart.objects.filter(user = request.user.username)
+        self.views['carts'] = OrderItem.objects.filter(user = request.user.username)
         
         return render(request, 'cart.html', self.views)
 
+# def cart(requset):
+#     if request.user.is_authenticated:
+#         customer = request.user.customer
+#         order, created = Order.objects.get_or_create(customer=customer, complete=false)
+#         items = order.orderitem_set.all() #Returns all OrderItem objects related to Order.
+#     else:
+#         items = []
+    
+#     context = {'carts':cart}
+#     return render(request, 'cart.html', context)
+
 # increase the quantity and update the total | fillup the cart infos
 def cart(request,slug):
-    if Cart.objects.filter(slug=slug, user= request.user.username).exists():
-        quantity = Cart.objects.get(slug=slug, user= request.user.username).quantity
+    if OrderItem.objects.filter(slug=slug, user= request.user.username).exists():
+        quantity = OrderItem.objects.get(slug=slug, user= request.user.username).quantity
         quantity = quantity +1
         price = Item.objects.get(slug=slug).price
         discounted_price = Item.objects.get(slug=slug).discounted_price
         if discounted_price > 0:
             total = quantity*discounted_price
-            Cart.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity)
+            OrderItem.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity)
         else:
             total = quantity*price
-        Cart.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity, total = total)
+        OrderItem.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity, total = total)
     
     else:
         price = Item.objects.get(slug=slug).price
@@ -136,7 +153,7 @@ def cart(request,slug):
             total = discounted_price
         else:
             total = price
-        data = Cart.objects.create(
+        data = OrderItem.objects.create(
             user = request.user.username,
             slug = slug,
             item = Item.objects.filter(slug=slug)[0], # [0] = the first element inside the list
@@ -145,35 +162,65 @@ def cart(request,slug):
         data.save()
     return redirect('home:mycart')
 
+def get_total_cart(request):
+    if OrderItem.objects.filter(user= request.user.username).exists():
+        total = OrderItem.objects.get(user= request.user.username).total
+        subtotal = sum([Cart.total for cart in Cart])
+
 #reduce quantity and update the total
 def deleteSingleCart(request,slug):
-    if Cart.objects.filter(slug=slug, user= request.user.username).exists():
-        quantity = Cart.objects.get(slug=slug, user= request.user.username).quantity
+    if OrderItem.objects.filter(slug=slug, user= request.user.username).exists():
+        quantity = OrderItem.objects.get(slug=slug, user= request.user.username).quantity
         quantity = quantity -1
         price = Item.objects.get(slug=slug).price
         discounted_price = Item.objects.get(slug=slug).discounted_price
         if discounted_price > 0:
             total = quantity*discounted_price
-            Cart.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity)
+            OrderItem.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity)
         else:
             total = quantity*price
-        Cart.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity, total = total)
+        OrderItem.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity, total = total)
 
         return redirect('home:mycart')
 
 def deleteCart(request,slug):
-    if Cart.objects.filter(slug=slug, user= request.user.username).exists():
-        Cart.objects.filter(slug=slug, user= request.user.username).delete()
+    if OrderItem.objects.filter(slug=slug, user= request.user.username).exists():
+        OrderItem.objects.filter(slug=slug, user= request.user.username).delete()
         messages.success(request, 'The item is deleted')
     return redirect('home:mycart')
 
-class BrandView(BaseView):
-    def get(self,request,name):
-        cat = Brand.objects.get(name = name).id
-        self.views['brand_items'] = Item.objects.filter(brand = cat)
-        return render(request, 'brand.html', self.views)
+class cartSummaryView(BaseView):
+    def get(self, request):
+        self.views['Total'] = Order.objects.filter(user = request.user.username)
+        
+        return render(request, 'cart.html', self.views)
+# class BrandView(BaseView):
+#     def get(self,request,name):
+#         cat = Brand.objects.get(name = name).id
+#         self.views['brand_items'] = Item.objects.filter(brand = cat)
+#         return render(request, 'brand.html', self.views)
 
 def contact(request):
+    if request.method == 'POST':
+        name = request.POST['name']
+        email = request.POST['email']
+        subject = request.POST['subject']
+        message = request.POST['message']
+
+        data = Contact.objects.create(
+            name = name,
+            email = email,
+            subject = subject,
+            message = message
+        )
+        data.save()
+        messages.success(request, 'Your message is sent.')
+        text_content = 'This is an important message.'
+        html_content = f"<p> The customer having name {name} , email address {email} of subject {subject} has a message {message}.</p>"
+                                                               #from (smpt server email)  #to
+        message = EmailMultiAlternatives(subject, text_content, 'taeanee101@gmail.com', ['taeanee101@gmail.com']) 
+        message.attach_alternative(html_content, "text/html")
+        message.send()
     return render(request, 'contact.html')
 
 def checkout(request):
@@ -184,3 +231,28 @@ def myAccount(request):
 
 def wishlist(request):
     return render(request, 'wishlist.html')
+
+#-------------------------------------------------API---------------------------------------------------
+from rest_framework import viewsets
+from . serializers import *
+# ViewSets define the view behavior.
+class ItemViewSet(viewsets.ModelViewSet):
+    queryset = Item.objects.all()
+    serializer_class = ItemSerializer
+
+class CartViewSet(viewsets.ModelViewSet):
+    queryset = OrderItem.objects.all()
+    serializer_class = CartSerializer
+
+from django.views.generic import View, DetailView
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, generics
+from rest_framework.filters import OrderingFilter, SearchFilter
+class ItemFilterListView(generics.ListAPIView):
+    queryset = Item.objects.all()
+    serializer_class = ItemSerializer
+
+    filter_backends = (DjangoFilterBackend, OrderingFilter, SearchFilter)
+    filter_fields = ['id','title','price','label','category']
+    ordering_fields = ['price','title','id']
+    search_fields = ['title','description']

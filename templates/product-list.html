@@ -24,10 +24,12 @@
                                 <div class="product-view-top">
                                     <div class="row">
                                         <div class="col-md-4">
-                                            <div class="product-search">
-                                                <input type="email" value="Search">
-                                                <button><i class="fa fa-search"></i></button>
-                                            </div>
+                                            <form method="GET" action="{% url 'home:search' %}">
+                                                <div class="product-search">
+                                                    <input name="query" type="text" value="Search">
+                                                    <button><i class="fa fa-search"></i></button>
+                                                </div>
+                                            </form>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="product-short">
@@ -63,37 +65,33 @@
                                     </div>
                                 </div>
                             </div>
-
-                            {% for prodList in productLists %}
+                            {% for product in productLists %}
                             <div class="col-md-4">
                                 <div class="product-item">
                                     <div class="product-title">
-                                        <a href="#">{{prodList.title}}</a>
-                                        <div class="ratting">
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                        </div>
+                                        <a href="#">{{product.title}}</a>
                                     </div>
                                     <div class="product-image">
                                         <a href="product-detail.html">
-                                            <img src="{{prodList.image}}" alt="Product Image" style="width:300px;height:300px;">
+                                            <img src="{{product.image.url}}" alt="Product Image" style="height: 250px;width: 250px;">
                                         </a>
                                         <div class="product-action">
-                                            <a href="#"><i class="fa fa-cart-plus"></i></a>
-                                            <a href="#"><i class="fa fa-heart"></i></a>
-                                            <a href="#"><i class="fa fa-search"></i></a>
+                                            <a class="btn" href="{{product.get_cart_url}}"><i class="fa fa-shopping-cart"></i>Add to Cart</a>
+                                            <a class="btn" href="{{product.get_cart_url}}"><i class="fa fa-shopping-bag"></i>Buy Now</a>
                                         </div>
                                     </div>
                                     <div class="product-price">
-                                        <h3><span>$</span>{{prodList.price}}</h3>
+                                        {% if product.discounted_price > 0 %}
+                                        <h3>${{product.discounted_price}} <span>${{product.price}}</span></h3>
+                                        {% else %}
+                                        <h3>${{product.price}}</h3>
+                                        {% endif %}
                                         <a class="btn" href=""><i class="fa fa-shopping-cart"></i>Buy Now</a>
                                     </div>
                                 </div>
                             </div>
-                            {% endfor %}    
+                            {% endfor %}
+                        </div>
                         
                         <!-- Pagination Start -->
                         <div class="col-md-12">
@@ -115,64 +113,18 @@
                     </div>           
                     
                     <!-- Side Bar Start -->
-                    <!-- changed width, top and bottom in css -->
                     <div class="col-lg-4 sidebar">
                         <div class="sidebar-widget category">
                             <h2 class="title">Category</h2>
                             <nav class="navbar bg-light">
-                                {% for category in categories %}
                                 <ul class="navbar-nav">
+                                    {% for category in categories %}
                                     <li class="nav-item">
-                                        <a class="nav-link" href="#"><i class="fa fa-{{category.image}}"></i>{{category.name}}</a>
+                                        <a class="nav-link" href="#"><i class="fa fa-{{category.image}} fa-rotate-270 fa-fw"></i>{{category.name}}</a>
                                     </li>
+                                    {% endfor %}
                                 </ul>
-                                {% endfor %}
                             </nav>
-                        </div>
-                        
-                        <div class="sidebar-widget widget-slider">
-                            <div class="sidebar-slider normal-slider">
-                                {% for slideList in productLists %}
-                                <div class="product-item">
-                                    <div class="product-title">
-                                        <a href="#">{{slideList.title}}</a>
-                                        <div class="ratting">
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                        </div>
-                                    </div>
-                                    <div class="product-image">
-                                        <a href="product-detail.html">
-                                            <img src="{{slideList.image}}" alt="Product Image" style="width:300px;height:300px;">
-                                        </a>
-                                        <div class="product-action">
-                                            <a href="#"><i class="fa fa-cart-plus"></i></a>
-                                            <a href="#"><i class="fa fa-heart"></i></a>
-                                            <a href="#"><i class="fa fa-search"></i></a>
-                                        </div>
-                                    </div>
-                                    <div class="product-price">
-                                        <h3><span>$</span>{{slideList.price}}</h3>
-                                        <a class="btn" href=""><i class="fa fa-shopping-cart"></i>Buy Now</a>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-
-                        <div class="sidebar-widget brands">
-                            <h2 class="title">Our Brands</h2>
-                            <ul>
-                                <li><a href="#">Nulla </a><span>(45)</span></li>
-                                <li><a href="#">Curabitur </a><span>(34)</span></li>
-                                <li><a href="#">Nunc </a><span>(67)</span></li>
-                                <li><a href="#">Ullamcorper</a><span>(74)</span></li>
-                                <li><a href="#">Fusce </a><span>(89)</span></li>
-                                <li><a href="#">Sagittis</a><span>(28)</span></li>
-                            </ul>
                         </div>
                         
                         <div class="sidebar-widget tag">
@@ -197,19 +149,4 @@
         </div>
         <!-- Product List End -->  
         
-        <!-- Brand Start -->
-        <div class="brand">
-            <div class="container-fluid">
-                <div class="brand-slider">
-                    <div class="brand-item"><img src="{% static 'img/brand-1.png' %}" alt=""></div>
-                    <div class="brand-item"><img src="{% static 'img/brand-2.png' %}" alt=""></div>
-                    <div class="brand-item"><img src="{% static 'img/brand-3.png' %}" alt=""></div>
-                    <div class="brand-item"><img src="{% static 'img/brand-4.png' %}" alt=""></div>
-                    <div class="brand-item"><img src="{% static 'img/brand-5.png' %}" alt=""></div>
-                    <div class="brand-item"><img src="{% static 'img/brand-6.png' %}" alt=""></div>
-                </div>
-            </div>
-        </div>
-        <!-- Brand End -->
-        
- {% endblock %}
+{% endblock %}

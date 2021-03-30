@@ -30,7 +30,7 @@
                         <div class="header-slider normal-slider">
                             {% for slider in sliders %}
                             <div class="header-slider-item">
-                                <img src="{{slider.image}}" alt="Slider Image" style="width:1000px;height:470px;"/>
+                                <img src="{{slider.image.url}}" alt="Slider Image" style="width:1000px;height:470px;"/>
                                 
                             </div>
                             {% endfor %} 
@@ -105,7 +105,7 @@
                     {% for ad in ads3 %}
                     <div class="col-md-3">
                         <div class="category-item ch-400">
-                            <img src="{{ad.image}}" />
+                            <img src="{{ad.image.url}}" />
                             <a class="category-name" href="">
                                 <p>{{ad.description}}</p>
                             </a>
@@ -116,7 +116,7 @@
                     <div class="col-md-3">
                         {% for ad in ads4 %}
                         <div class="category-item ch-250">
-                            <img src="{{ad.image}}" />
+                            <img src="{{ad.image.url}}" />
                             <a class="category-name" href="">
                                 <p>{{ad.description}}</p>
                             </a>
@@ -124,7 +124,7 @@
                         {% endfor %}
                         {% for ad in ads1 %}
                         <div class="category-item ch-150">
-                            <img src="{{ad.image}}" />
+                            <img src="{{ad.image.url}}" />
                             <a class="category-name" href="">
                                 <p>{{ad.description}}</p>
                             </a>
@@ -134,7 +134,7 @@
                     <div class="col-md-3">
                         {% for ad in ads2 %}
                         <div class="category-item ch-150">
-                            <img src="{{ad.image}}" />
+                            <img src="{{ad.image.url}}" />
                             <a class="category-name" href="">
                                 <p>{{ad.description}}</p>
                             </a>
@@ -142,7 +142,7 @@
                         {% endfor %}
                         {% for ad in ads5 %}
                         <div class="category-item ch-250">
-                            <img src="{{ad.image}}" />
+                            <img src="{{ad.image.url}}" />
                             <a class="category-name" href="">
                                 <p>Some text goes here that describes the image</p>
                             </a>
@@ -152,7 +152,7 @@
                     <div class="col-md-3">
                         {% for ad in ads6 %}
                         <div class="category-item ch-400">
-                            <img src="{{ad.image}}" />
+                            <img src="{{ad.image.url}}" />
                             <a class="category-name" href="">
                                 <p>{{ad.description}}</p>
                             </a>
@@ -201,7 +201,7 @@
                             </div>
                             <div class="product-image">
                                 <a href="{{hot_item.get_url}}">
-                                    <img src="{{hot_item.image}}" alt="Product Image" style="width:300px;height:300px;">
+                                    <img src="{{hot_item.image.url}}" alt="Product Image" style="width:300px;height:300px;">
                                 </a>
                                 <div class="product-action">
                                     <a href="{{hot_item.get_cart_url}}"><i class="fa fa-cart-plus"></i></a>
@@ -265,7 +265,7 @@
                             </div>
                             <div class="product-image">
                                 <a href="{{new_item.get_url}}">
-                                    <img src="{{new_item.image}}" alt="Product Image" style="width:300px;height:300px;">
+                                    <img src="{{new_item.image.url}}" alt="Product Image" style="width:300px;height:300px;">
                                 </a>
                                 <div class="product-action">
                                     <a href="{{new_item.get_cart_url}}"><i class="fa fa-cart-plus"></i></a>
