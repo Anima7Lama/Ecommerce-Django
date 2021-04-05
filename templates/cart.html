@@ -2,18 +2,30 @@
 {% load static %}
 {% block content %}      
         
+        <!-- message alert -->
+        {% if messages %}
+        {% for message in messages %}
+        <div style="margin-top: 1rem;" class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{message}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>    
+        {% endfor %}
+        {% endif %}
+
         <!-- Breadcrumb Start -->
         <div class="breadcrumb-wrap">
             <div class="container-fluid">
                 <ul class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="#">Home</a></li>
-                    <li class="breadcrumb-item"><a href="#">Products</a></li>
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="product-list">Products</a></li>
                     <li class="breadcrumb-item active">Cart</li>
                 </ul>
             </div>
         </div>
         <!-- Breadcrumb End -->
-        
+
         <!-- Cart Start -->
         <div class="cart-page">
             <div class="container-fluid">
@@ -24,17 +36,17 @@
                                 <table class="table table-bordered">
                                     <thead class="thead-dark">
                                         <tr>
-                                            <th>Product</th>
-                                            <th>Product Code</th>
-                                            <th>Price</th>
-                                            <th>Quantity</th>
-                                            <th>Total</th>
-                                            <th>Remove</th>
+                                            <th>PRODUCT</th>
+                                            <th>PRODUCT CODE</th>
+                                            <th>PRICE</th>
+                                            <th>QUANTITY</th>
+                                            <th>TOTAL</th>
+                                            <th>REMOVE</th>
                                         </tr>
                                     </thead>
                                     <tbody class="align-middle">
                                         <!-- getting values from foreign key too -->
-                                        {% for cart in carts.all %} 
+                                        {% for cart in order.items.all %} 
                                         <tr>
                                             <td>
                                                 <div class="img">
@@ -58,10 +70,15 @@
                                                     <a href="{{cart.item.get_cart_url}}"><button class="btn-plus"><i class="fa fa-plus"></i></button></a>
                                                 </div>
                                             </td>
-                                            <td>${{cart.total}}</td>
-                                            <td><a href="{{cart.delete_cart_url}}"><button><i class="fa fa-trash"></i></button></a></td>
+                                            <td>${{cart.get_final_price}}</td>
+                                            <td><a href="{{cart.delete_cart_url}}"><button style="background-color: crimson;"><i class="fa fa-trash"></i></button></a></td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="8" style="color: crimson; font-weight: bold;font-size: 20px;">Your Cart is empty</td>
                                         </tr>
                                         {% endfor %}
+                                        
                                     </tbody>
                                 </table>
                             </div>
@@ -76,23 +93,25 @@
                                         <button>Apply Code</button>
                                     </div>
                                 </div>
-                                {% for total in Total.all %}
                                 <div class="col-md-12">
                                     <div class="cart-summary">
                                         <div class="cart-content">
-                                            <h1>Cart Summary</h1>
-                                            <p>Sub Total<span>{{total.get_cart_total}}</span></p>
-                                            <p>Shipping Cost<span>$1</span></p>
-                                            <h2>Grand Total<span>$100</span></h2>
+                                            {% if order.get_cart_total %}
+                                            <h1>CART SUMMARY</h1>
+                                            <p>Sub Total<span>${{order.get_sub_total}}</span></p>
+                                            <p>Shipping Cost<span>$5</span></p>
+
+                                            <h2>Grand Total<span>${{order.get_cart_total}}</span></h2>
+                                            
                                         </div>
                                         <div class="cart-btn">
-                                            <button>Update Cart</button>
-                                            <button>Checkout</button>
+                                            <a href="product-list"><button style="width: 165px;margin-right:5px;">Continue Shopping</button></a>
+                                            {% endif %}
+                                            <a href="checkout" ><button style="margin-right:5px; background:  #002D62">Checkout</button></a>
                                         </div>
                                     </div>
                                     
                                 </div>
-                                {% endfor %}
                             </div>
                         </div>
                     </div>

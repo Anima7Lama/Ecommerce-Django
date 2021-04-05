@@ -2,6 +2,7 @@ from django.db import models
 STATUS = (('in', 'In Stock'),('out', 'Out Of Stock')) #create tuple inside tuple for choices
 LABEL = (('new', 'New Product'),('hot', 'Hot Product'),('sales', 'Product in sale'))
 
+from django_countries.fields import CountryField
 from django.contrib.auth.models import User
 from django.urls import reverse
 from ckeditor.fields import RichTextField
@@ -9,7 +10,7 @@ from ckeditor.fields import RichTextField
 # Create your models here.
 class Category(models.Model):
     name = models.CharField(max_length=200)
-    slug = models.CharField(max_length=200, unique=True) #unique id 
+    slug = models.SlugField(max_length=200, unique=True) #unique id 
     image = models.ImageField(upload_to = 'media') 
 
     def __str__(self):
@@ -79,13 +80,14 @@ class Customer(models.Model):
         return self.name 
 
 class OrderItem(models.Model):
-    slug = models.CharField(max_length=200, null=True)
-    user = models.CharField(max_length=200, blank=True)
-    item = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True) 
+    slug = models.CharField(max_length=200, blank=True, null=True)
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    item = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True)
+    quantity = models.IntegerField(default=1) 
+    ordered = models.BooleanField(default=False) 
     # order = models.ForeignKey(Order, on_delete=models.SET_NULL, blank=True, null=True) 
-    quantity = models.IntegerField(default=1)
-    total = models.IntegerField(null=True)
-    date_added = models.DateTimeField(auto_now_add=True)
+    # total = models.IntegerField(null=True)
+    # date_added = models.DateTimeField(auto_now_add=True)
 
     # items = models.ManyToManyField(OrderedItem)
     # item = models.ForeignKey(Item, on_delete = models.CASCADE)
@@ -104,35 +106,49 @@ class OrderItem(models.Model):
     def delete_single_cart_url(self):
         return reverse("home:delete-single-cart", kwargs={'slug':self.slug})
 
+    def get_total_item_price(self):
+        return self.quantity * self.item.price
+    
+    def get_total_item_discounted_price(self):
+        return self.quantity * self.item.discounted_price
+    
+    def get_final_price(self):
+        if self.item.discounted_price:
+            return self.get_total_item_discounted_price()
+        return self.get_total_item_price()
+    
 class Order(models.Model):
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
     items = models.ManyToManyField(OrderItem)
     ordered_date = models.DateTimeField(auto_now_add=True) #we can change the value whenever the order is set to complete
     ordered = models.BooleanField(default=False) 
-    transaction_id = models.CharField(max_length=200, null=True)
+    # transaction_id = models.CharField(max_length=200, null=True)
+    # shipping_fee = models.FloatField(null=True)
 
     def __str__(self):
         return self.customer.username
-    
-    @property
-    def get_cart_total(self):
-        total = 0
+
+    def get_sub_total(self):
+        subtotal = 0
         for order_item in self.items.all():
-            total = sum(order_item.total)
-        
-        return total
+            subtotal += order_item.get_final_price()
+        return subtotal
+    
+    def get_cart_total(self):
+        return 5 + self.get_sub_total()
 
 class ShippingAddress(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, blank=True, null=True) 
     # order = models.ForeignKey(Order, on_delete=models.SET_NULL, blank=True, null=True) 
     address = models.CharField(max_length=300, null=True)
     city = models.CharField(max_length=300, null=True)
-    state = models.CharField(max_length=300, null=True)
+    country = CountryField(multiple=False, null=True)
     zipcode = models.CharField(max_length=300, null=True)
-    date_added = models.DateTimeField(auto_now_add=True)
+
 
     def __str__(self):
-        return self.item.address
+        return self.customer.username
+
 class Contact(models.Model):
     name = models.CharField(max_length=200)
     email = models.CharField(max_length=300)

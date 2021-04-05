@@ -1,5 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Category, Slider, Ad, Item, Customer, OrderItem, Order, ShippingAddress, Contact
+from django.utils import timezone
 
 # Create your views here.
 from django.views.generic.base import View
@@ -115,85 +118,143 @@ def login(request):
         
     return render(request, 'signin.html')
 
-class cartView(BaseView):
+class cartView(LoginRequiredMixin, BaseView): #requires login
     def get(self, request):
-        self.views['carts'] = OrderItem.objects.filter(user = request.user.username)
-        
-        return render(request, 'cart.html', self.views)
-
-# def cart(requset):
-#     if request.user.is_authenticated:
-#         customer = request.user.customer
-#         order, created = Order.objects.get_or_create(customer=customer, complete=false)
-#         items = order.orderitem_set.all() #Returns all OrderItem objects related to Order.
-#     else:
-#         items = []
-    
-#     context = {'carts':cart}
-#     return render(request, 'cart.html', context)
-
-# increase the quantity and update the total | fillup the cart infos
-def cart(request,slug):
-    if OrderItem.objects.filter(slug=slug, user= request.user.username).exists():
-        quantity = OrderItem.objects.get(slug=slug, user= request.user.username).quantity
-        quantity = quantity +1
-        price = Item.objects.get(slug=slug).price
-        discounted_price = Item.objects.get(slug=slug).discounted_price
-        if discounted_price > 0:
-            total = quantity*discounted_price
-            OrderItem.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity)
+        try:
+            self.views['order'] = Order.objects.get(customer = request.user, ordered=False)
+            return render(request, 'cart.html', self.views)
+            
+        except ObjectDoesNotExist:
+            messages.success(self.request, "You dont have an active order")
+            return render(request, 'cart.html', self.views)
+       
+@login_required
+def add_to_cart(request, slug):
+    item = get_object_or_404(Item, slug=slug)
+    order_item, created = OrderItem.objects.get_or_create(slug=item.slug, item=item, customer=request.user, ordered=False)
+    order_qs = Order.objects.filter(customer= request.user, ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        #checking if the order item is in the order
+        if order.items.filter(item__slug=item.slug).exists():
+            order_item.quantity += 1
+            order_item.save() 
+            messages.success(request, f"{item.title}'s quantity is updated")
+            return redirect('home:mycart')
         else:
-            total = quantity*price
-        OrderItem.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity, total = total)
-    
+            order.items.add(order_item)
+            order.save()
+            messages.success(request, f"{item.title} is added to your cart.")
+            return redirect('home:mycart')
     else:
-        price = Item.objects.get(slug=slug).price
-        discounted_price = Item.objects.get(slug=slug).discounted_price
-        if discounted_price > 0:
-            total = discounted_price
-        else:
-            total = price
-        data = OrderItem.objects.create(
-            user = request.user.username,
-            slug = slug,
-            item = Item.objects.filter(slug=slug)[0], # [0] = the first element inside the list
-            total = total
-        )
-        data.save()
-    return redirect('home:mycart')
-
-def get_total_cart(request):
-    if OrderItem.objects.filter(user= request.user.username).exists():
-        total = OrderItem.objects.get(user= request.user.username).total
-        subtotal = sum([Cart.total for cart in Cart])
-
-#reduce quantity and update the total
-def deleteSingleCart(request,slug):
-    if OrderItem.objects.filter(slug=slug, user= request.user.username).exists():
-        quantity = OrderItem.objects.get(slug=slug, user= request.user.username).quantity
-        quantity = quantity -1
-        price = Item.objects.get(slug=slug).price
-        discounted_price = Item.objects.get(slug=slug).discounted_price
-        if discounted_price > 0:
-            total = quantity*discounted_price
-            OrderItem.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity)
-        else:
-            total = quantity*price
-        OrderItem.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity, total = total)
-
+        ordered_date = timezone.now()
+        order = Order.objects.create(customer=request.user, ordered=False, ordered_date=ordered_date)
+        order.items.add(order_item)
+        order.save()
+        messages.success(request, f"{item.title} is added to your cart.")
         return redirect('home:mycart')
 
+@login_required
+def remove_single_item_from_cart(request, slug):
+    item = get_object_or_404(Item, slug=slug)
+    order_item, created = OrderItem.objects.get_or_create(slug=item.slug, item=item, customer=request.user, ordered=False)
+    order_qs = Order.objects.filter(customer= request.user, ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        #checking if the order item is in the order
+        if order.items.filter(item__slug=item.slug).exists():
+            if order_item.quantity > 1:
+                order_item.quantity -= 1
+                order_item.save() 
+                messages.success(request, f"{item.title}'s quantity is updated.")
+            else:
+                OrderItem.objects.filter(slug=slug, customer= request.user).delete()
+                messages.success(request, f"{item.title} is deleted from your cart.")
+            return redirect('home:mycart')
+        else:
+            messages.info(request, f"Your cart is empty!")
+            return redirect('home:mycart')        
+    else:
+        messages.info("You don't have any order yet!")
+        return redirect('home:mycart')        
+
 def deleteCart(request,slug):
-    if OrderItem.objects.filter(slug=slug, user= request.user.username).exists():
-        OrderItem.objects.filter(slug=slug, user= request.user.username).delete()
-        messages.success(request, 'The item is deleted')
+    item = get_object_or_404(Item, slug=slug)
+    if OrderItem.objects.filter(slug=slug, item=item, customer= request.user).exists():
+        OrderItem.objects.filter(slug=slug, customer= request.user).delete()
+        messages.success(request, f"{item.title} was deleted from your cart.")
     return redirect('home:mycart')
 
-class cartSummaryView(BaseView):
-    def get(self, request):
-        self.views['Total'] = Order.objects.filter(user = request.user.username)
+def checkout(request):
+    return render(request, 'checkout.html')  
+    
+# increase the quantity and update the total | fillup the cart infos
+# def cart(request,slug):
+#     if OrderItem.objects.filter(slug=slug, user= request.user.username).exists():
+#         quantity = OrderItem.objects.get(slug=slug, user= request.user.username).quantity
+#         quantity = quantity +1
+#         price = Item.objects.get(slug=slug).price
+#         discounted_price = Item.objects.get(slug=slug).discounted_price
+#         if discounted_price > 0:
+#             total = quantity*discounted_price
+#             OrderItem.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity)
+#         else:
+#             total = quantity*price
+#         OrderItem.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity, total = total)
+    
+#     else:
+#         price = Item.objects.get(slug=slug).price
+#         discounted_price = Item.objects.get(slug=slug).discounted_price
+#         if discounted_price > 0:
+#             total = discounted_price
+#         else:
+#             total = price
+#         data = OrderItem.objects.create(
+#             user = request.user.username,
+#             slug = slug,
+#             item = Item.objects.filter(slug=slug)[0], # [0] = the first element inside the list
+#             total = total
+#         )
+#         data.save()
+#     return redirect('home:mycart')
+
+# class cartSummaryView(BaseView):
+#     def get(self, request):
+#         self.views['Total'] = Order.objects.filter(customer = request.user, ordered=False)
         
-        return render(request, 'cart.html', self.views)
+#         return render(request, 'cart.html', self.views)
+
+# def totalCart(request):
+#     subtotal = 0
+#     if Order.objects.filter(customer= request.user.username).exists():
+#         items = Order.objects.get(customer= request.user.username).items.all()
+#         for item in items:
+#             subtotal = sum(item.total)
+#             data = Order.objects.create(
+#                 customer = request.user.username,
+#                 items = OrderItem.objects.filter(customer= request.user.username).item, # [0] = the first element inside the list
+#                 subtotal = subtotal
+#             )
+#             data.save()
+#         return redirect('home:mycart')
+
+#reduce quantity and update the total
+# def deleteSingleCart(request,slug):
+#     if OrderItem.objects.filter(slug=slug, customer= request.user).exists():
+#         quantity = OrderItem.objects.get(slug=slug, customer= request.user).quantity
+#         quantity = quantity -1
+#         price = Item.objects.get(slug=slug).price
+#         discounted_price = Item.objects.get(slug=slug).discounted_price
+#         if discounted_price > 0:
+#             total = quantity*discounted_price
+#             OrderItem.objects.filter(slug=slug, customer= request.user).update(quantity = quantity)
+#         else:
+#             total = quantity*price
+#         OrderItem.objects.filter(slug=slug, customer= request.user).update(quantity = quantity, total = total)
+
+#         return redirect('home:mycart')
+
+
 # class BrandView(BaseView):
 #     def get(self,request,name):
 #         cat = Brand.objects.get(name = name).id
@@ -223,8 +284,7 @@ def contact(request):
         message.send()
     return render(request, 'contact.html')
 
-def checkout(request):
-    return render(request, 'checkout.html')
+
 
 def myAccount(request):
     return render(request, 'my-account.html')
