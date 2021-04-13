@@ -1739,7 +1739,7 @@ h2 {
 }
 
 .checkout .shipping-address {
-    display: none;
+    /* display: none; */
     margin-top: 30px;
 }
 

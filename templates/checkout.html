@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 {% load static %}
 {% block content %}  
         
@@ -20,111 +21,145 @@
                 <div class="row">
                     <div class="col-lg-8">
                         <div class="checkout-inner">
-                            <div class="billing-address">
-                                <h2>Billing Address</h2>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label>First Name</label>
-                                        <input class="form-control" type="text" placeholder="First Name">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>Last Name"</label>
-                                        <input class="form-control" type="text" placeholder="Last Name">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>E-mail</label>
-                                        <input class="form-control" type="text" placeholder="E-mail">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>Mobile No</label>
-                                        <input class="form-control" type="text" placeholder="Mobile No">
-                                    </div>
-                                    <div class="col-md-12">
-                                        <label>Address</label>
-                                        <input class="form-control" type="text" placeholder="Address">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>Country</label>
-                                        <select class="custom-select">
-                                            <option selected>United States</option>
-                                            <option>Afghanistan</option>
-                                            <option>Albania</option>
-                                            <option>Algeria</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>City</label>
-                                        <input class="form-control" type="text" placeholder="City">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>State</label>
-                                        <input class="form-control" type="text" placeholder="State">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>ZIP Code</label>
-                                        <input class="form-control" type="text" placeholder="ZIP Code">
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="newaccount">
-                                            <label class="custom-control-label" for="newaccount">Create an account</label>
+                            <!-- <form action="" method="POST">
+                                {% csrf_token %}
+                                {{form | crispy}}
+                                <button type="submit" class="btn btn-info">Submit</button>
+                            </form>  -->
+                            <form action="" method="POST">
+                                {% csrf_token %}
+                                <div class="billing-address">
+                                    <h2>SHIPPING ADDRESS</h2>
+                                    <div class="row"> 
+                                        <div class="col-md-12">
+                                            <label for="shipping_address1">Street Address</label>
+                                            <input class="form-control" name="shipping_address1" id="shipping_address1" type="text" placeholder="st 1202 ...">
+                                            <!-- {{ form.street_address }} -->
                                         </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="shipto">
-                                            <label class="custom-control-label" for="shipto">Ship to different address</label>
+                                        <div class="col-md-12">
+                                            <label for="shipping_address2">Apartment Address (Optional)</label>
+                                            <input class="form-control" name="shipping_address2" id="shipping_address2" type="text" placeholder="apartment add..">
+                                            <!-- {{ form.apartment_address }} -->
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="shipping_country">Country</label>
+                                            {{form.shipping_country}}
+                                            <div class="invalid-feedback">
+                                            Please select a valid country.
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="shipping_city">City</label>
+                                            <input class="form-control" name="shipping_city" id="city" type="text" placeholder="City">
+                                            <!-- {{ form.city }} -->
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="shipping_zipcode">ZIP Code</label>
+                                            <input class="form-control" name="shipping_zipcode" id="shipping_zipcode" type="text" placeholder="ZIP Code">
+                                            <!-- {{ form.zipcode }} -->
+                                        </div>
+                                        <!-- <div class="col-md-12">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" id="newaccount">
+                                                <label class="custom-control-label" for="newaccount">Create an account</label>
+                                            </div>
+                                        </div> -->
+                                        <div class="col-md-12">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" name="set_default_shipping" class="custom-control-input" id="set_default_shipping">
+                                                <!-- {{form.save_info}} -->
+                                                <label class="custom-control-label" for="set_default_shipping">Save as default Shipping Address</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" name="same_billing_address" class="custom-control-input" id="same_billing_address">
+                                                <!-- {{form.same_shipping_address}} -->
+                                                <label class="custom-control-label" for="same_billing_address">Same Shipping Address</label>
+                                            </div>
+                                        </div>
+                                        {% if default_shipping_address %}
+                                        <div class="col-md-12">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" name="use_default_shipping" class="custom-control-input" id="use_default_shipping">
+                                                <!-- {{form.same_shipping_address}} -->
+                                                <label class="custom-control-label" for="use_default_shipping">Use default Shipping Address: {{ default_shipping_address.street_address|truncatechars:10 }}</label>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        <div class="col-md-12">
+                                            <label>Payment Option </label>
+                                            <div class="custom-control custom-radio">
+                                                <input id="debit" value="D" name="payment_option" type="radio" class="custom-control-input">
+                                                <label class="custom-control-label" for="debit">Debit Card</label>
+                                            </div>
+                                            <div class="custom-control custom-radio">
+                                                <input id="paypal" value="P" name="payment_option" type="radio" class="custom-control-input">
+                                                <label class="custom-control-label" for="paypal">Paypal</label>
+                                            </div>
+                                            <!-- {{ form.payment_option }} -->   
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="shipping-address">
-                                <h2>Shipping Address</h2>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label>First Name</label>
-                                        <input class="form-control" type="text" placeholder="First Name">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>Last Name"</label>
-                                        <input class="form-control" type="text" placeholder="Last Name">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>E-mail</label>
-                                        <input class="form-control" type="text" placeholder="E-mail">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>Mobile No</label>
-                                        <input class="form-control" type="text" placeholder="Mobile No">
-                                    </div>
-                                    <div class="col-md-12">
-                                        <label>Address</label>
-                                        <input class="form-control" type="text" placeholder="Address">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>Country</label>
-                                        <select class="custom-select">
-                                            <option selected>United States</option>
-                                            <option>Afghanistan</option>
-                                            <option>Albania</option>
-                                            <option>Algeria</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>City</label>
-                                        <input class="form-control" type="text" placeholder="City">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>State</label>
-                                        <input class="form-control" type="text" placeholder="State">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>ZIP Code</label>
-                                        <input class="form-control" type="text" placeholder="ZIP Code">
+                                <hr>
+                                <div class="billing-address">
+                                    <h2>BILLING ADDRESS</h2>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <label for="billing_address1">Street Address</label>
+                                            <input class="form-control" name="billing_address1" id="billing_address1" type="text" placeholder="123 Main St">
+                                            <!-- {{ form.street_address }} -->
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label for="billing_address2">Apartment Address (Optional)</label>
+                                            <input class="form-control" name="billing_address2" id="billing_address2" type="text" placeholder="Apartment, Suite or Floor">
+                                            <!-- {{ form.apartment_address }} -->
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="country">Country</label>
+                                            {{ form.billing_country }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="billing_city">City</label>
+                                            <input class="form-control" name="billing_city" id="billing_city" type="text" placeholder="City">
+                                            <!-- {{ form.city }} -->
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="billing_zipcode">ZIP Code</label>
+                                            <input class="form-control" name="billing_zipcode" id="billing_zipcode" type="text" placeholder="ZIP Code">
+                                            <!-- {{ form.zipcode }} -->
+                                        </div>
+                                        <!-- <div class="col-md-12">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" name="save_info" class="custom-control-input" id="save_info">
+                                                
+                                                <label class="custom-control-label" for="save_info">Save Info</label>
+                                            </div>
+                                        </div> -->
+                                        <div class="col-md-12">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" name="set_default_billing" class="custom-control-input" id="set_default_billing">
+                                                <!-- {{form.save_info}} -->
+                                                <label class="custom-control-label" for="set_default_billing">Save as default billing Address</label>
+                                            </div>
+                                        </div>
+                                        {% if default_billing_address%}
+                                        <div class="col-md-12">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" name="use_default_billing" class="custom-control-input" id="use_default_billing">
+                                                <!-- {{form.same_billing_address}} -->
+                                                <label class="custom-control-label" for="use_default_billing">Use default billing Address: {{ default_billing_address.street_address|truncatechars:10 }}</label>
+                                            </div>
+                                        </div>
+                                        {% endif %}
                                     </div>
                                 </div>
-                            </div>
+                                <div class="col-md-12">
+                                    <a href="payment" ><button class="btn btn-primary" type="submit" style="width:350px; background:#002D62; color: gainsboro;float: right;">Continue Checkout</button></a>
+                                    <!-- <a href="payment" ><button style="margin-right:5px; background:  #002D62">PAyment</button></a> -->
+                                            
+                                </div>
+                            </form>
                         </div>
                     </div>
                     <div class="col-lg-4">
@@ -137,69 +172,6 @@
                                 <h2>Grand Total<span>$100</span></h2>
                             </div>
 
-                            <div class="checkout-payment">
-                                <div class="payment-methods">
-                                    <h1>Payment Methods</h1>
-                                    <div class="payment-method">
-                                        <div class="custom-control custom-radio">
-                                            <input type="radio" class="custom-control-input" id="payment-1" name="payment">
-                                            <label class="custom-control-label" for="payment-1">Paypal</label>
-                                        </div>
-                                        <div class="payment-content" id="payment-1-show">
-                                            <p>
-                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tincidunt orci ac eros volutpat maximus lacinia quis diam.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="payment-method">
-                                        <div class="custom-control custom-radio">
-                                            <input type="radio" class="custom-control-input" id="payment-2" name="payment">
-                                            <label class="custom-control-label" for="payment-2">Payoneer</label>
-                                        </div>
-                                        <div class="payment-content" id="payment-2-show">
-                                            <p>
-                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tincidunt orci ac eros volutpat maximus lacinia quis diam.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="payment-method">
-                                        <div class="custom-control custom-radio">
-                                            <input type="radio" class="custom-control-input" id="payment-3" name="payment">
-                                            <label class="custom-control-label" for="payment-3">Check Payment</label>
-                                        </div>
-                                        <div class="payment-content" id="payment-3-show">
-                                            <p>
-                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tincidunt orci ac eros volutpat maximus lacinia quis diam.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="payment-method">
-                                        <div class="custom-control custom-radio">
-                                            <input type="radio" class="custom-control-input" id="payment-4" name="payment">
-                                            <label class="custom-control-label" for="payment-4">Direct Bank Transfer</label>
-                                        </div>
-                                        <div class="payment-content" id="payment-4-show">
-                                            <p>
-                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tincidunt orci ac eros volutpat maximus lacinia quis diam.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="payment-method">
-                                        <div class="custom-control custom-radio">
-                                            <input type="radio" class="custom-control-input" id="payment-5" name="payment">
-                                            <label class="custom-control-label" for="payment-5">Cash on Delivery</label>
-                                        </div>
-                                        <div class="payment-content" id="payment-5-show">
-                                            <p>
-                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tincidunt orci ac eros volutpat maximus lacinia quis diam.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="checkout-btn">
-                                    <button>Place Order</button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

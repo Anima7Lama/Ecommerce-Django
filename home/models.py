@@ -1,6 +1,7 @@
 from django.db import models
 STATUS = (('in', 'In Stock'),('out', 'Out Of Stock')) #create tuple inside tuple for choices
 LABEL = (('new', 'New Product'),('hot', 'Hot Product'),('sales', 'Product in sale'))
+ADDRESS_OPTION = (('B', 'Billing'),('S', 'Shipping'))
 
 from django_countries.fields import CountryField
 from django.contrib.auth.models import User
@@ -11,7 +12,7 @@ from ckeditor.fields import RichTextField
 class Category(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True) #unique id 
-    image = models.ImageField(upload_to = 'media') 
+    image = models.CharField(max_length=100, blank=True, null=True) 
 
     def __str__(self):
         return self.name #show the category name instead of category id
@@ -71,13 +72,16 @@ class Item(models.Model):
     def get_cart_url(self):
         return reverse("home:add-to-cart", kwargs={'slug':self.slug}) # slug value is in item, so the function is made in item model.
 
-class Customer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
-    name = models.CharField(max_length=300, null=True)
-    email = models.EmailField(max_length=300, null=True)
+# class Customer(models.Model):
+#     user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
+#     first_name = models.CharField(max_length=300, null=True)
+#     last_name = models.CharField(max_length=300, null=True)
+#     email = models.EmailField(max_length=300, null=True)
+#     phone_number = models.CharField(max_length=100, null=True)
 
-    def __str__(self):
-        return self.name 
+#     def __str__(self):
+#         return self.first_name
+
 
 class OrderItem(models.Model):
     slug = models.CharField(max_length=200, blank=True, null=True)
@@ -85,17 +89,7 @@ class OrderItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True)
     quantity = models.IntegerField(default=1) 
     ordered = models.BooleanField(default=False) 
-    # order = models.ForeignKey(Order, on_delete=models.SET_NULL, blank=True, null=True) 
-    # total = models.IntegerField(null=True)
-    # date_added = models.DateTimeField(auto_now_add=True)
-
-    # items = models.ManyToManyField(OrderedItem)
-    # item = models.ForeignKey(Item, on_delete = models.CASCADE)
-    # slug = models.CharField(max_length=200)
-    # quantity = models.IntegerField(default=1)
-    # user = models.CharField(max_length=200)
-    # date = models.DateTimeField(auto_now=True)
-    # total = models.IntegerField(null=True)
+    
 
     def __str__(self):
         return self.item.title
@@ -120,8 +114,10 @@ class OrderItem(models.Model):
 class Order(models.Model):
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
     items = models.ManyToManyField(OrderItem)
-    ordered_date = models.DateTimeField(auto_now_add=True) #we can change the value whenever the order is set to complete
+    ordered_date = models.DateTimeField(null=True)
     ordered = models.BooleanField(default=False) 
+    shipping_address = models.ForeignKey('Address', related_name='shipping_address', on_delete=models.SET_NULL, blank=True, null=True)
+    billing_address = models.ForeignKey('Address', related_name='billing_address', on_delete=models.SET_NULL, blank=True, null=True)
     # transaction_id = models.CharField(max_length=200, null=True)
     # shipping_fee = models.FloatField(null=True)
 
@@ -137,17 +133,22 @@ class Order(models.Model):
     def get_cart_total(self):
         return 5 + self.get_sub_total()
 
-class ShippingAddress(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, blank=True, null=True) 
+class Address(models.Model):
+    customer = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True) 
     # order = models.ForeignKey(Order, on_delete=models.SET_NULL, blank=True, null=True) 
-    address = models.CharField(max_length=300, null=True)
+    street_address = models.CharField(max_length=300, null=True)
+    apartment_address = models.CharField(max_length=300, null=True)
     city = models.CharField(max_length=300, null=True)
-    country = CountryField(multiple=False, null=True)
+    country = CountryField(multiple=False)
     zipcode = models.CharField(max_length=300, null=True)
-
+    address_type = models.CharField(max_length=50, choices = ADDRESS_OPTION)
+    default = models.BooleanField(default=False)
+    # is_shipping_address = models.BooleanField(default=False, null=True)
+    # is_billing_address = models.BooleanField(default=False, null=True)
 
     def __str__(self):
-        return self.customer.username
+        return f"{self.country} [{self.street_address}]"
+
 
 class Contact(models.Model):
     name = models.CharField(max_length=200)

@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Category, Slider, Ad, Item, Customer, OrderItem, Order, ShippingAddress, Contact
+from .models import Category, Slider, Ad, Item, OrderItem, Order, Address, Contact
 from django.utils import timezone
+from .forms import AddressForm
 
 # Create your views here.
 from django.views.generic.base import View
@@ -90,6 +92,13 @@ def register(request):
                     email = email,
                     password = password,
                 )
+                # data2 = Customer.objects.create(
+                #     first_name = first_name,
+                #     last_name = last_name,
+                #     email = email,
+                #     phone_number = phone_number,
+                # )
+                # data2.save()
                 data.save()
                 messages.error(request, 'You have successfully signed up.')
                 return redirect('home:signup')
@@ -125,7 +134,7 @@ class cartView(LoginRequiredMixin, BaseView): #requires login
             return render(request, 'cart.html', self.views)
             
         except ObjectDoesNotExist:
-            messages.success(self.request, "You dont have an active order")
+            messages.info(self.request, "You dont have an active order")
             return render(request, 'cart.html', self.views)
        
 @login_required
@@ -175,7 +184,7 @@ def remove_single_item_from_cart(request, slug):
             messages.info(request, f"Your cart is empty!")
             return redirect('home:mycart')        
     else:
-        messages.info("You don't have any order yet!")
+        messages.info(request,"You don't have any order yet!")
         return redirect('home:mycart')        
 
 def deleteCart(request,slug):
@@ -185,9 +194,159 @@ def deleteCart(request,slug):
         messages.success(request, f"{item.title} was deleted from your cart.")
     return redirect('home:mycart')
 
-def checkout(request):
-    return render(request, 'checkout.html')  
+#checking empty values in the form
+def is_valid_form(values):
+    valid = True
+    for field in values:
+        if field == '':
+            valid = False
+    return valid
+class checkoutView(BaseView):
+    def get(self,request):
+        try:
+            order = Order.objects.get(customer=self.request.user, ordered=False)
+            form = AddressForm()
+            context = {
+                'form': form
+            }
+            # checking if there is a default shipping or billing address
+            shipping_address_qs = Address.objects.filter(customer=self.request.user, address_type='S', default=True)
+            if shipping_address_qs.exists():
+                context.update({'default_shipping_address': shipping_address_qs[0]})
+            
+            billing_address_qs = Address.objects.filter(customer=self.request.user, address_type='B', default=True)
+            if billing_address_qs.exists():
+                context.update({'default_billing_address': billing_address_qs[0]}) #if there is default address, 
+            return render(self.request, 'checkout.html', context)  
+
+        except ObjectDoesNotExist:
+            messages.info(self.request, "You do not have an active order")
+            return redirect("home:checkout")
     
+    def post(self, request):
+        form = AddressForm(self.request.POST or None)
+        try:
+            order = Order.objects.get(customer = request.user, ordered=False) 
+            if form.is_valid():
+                use_default_shipping = form.cleaned_data.get('use_default_shipping')
+                if use_default_shipping:
+                    print("Using the default shipping address")
+                    shipping_address_qs = Address.objects.filter(customer=self.request.user, address_type='S', default=True)
+                    if shipping_address_qs.exists():
+                        shipping_address = shipping_address_qs[0]
+                        order.shipping_address=shipping_address
+                        order.save()
+                    else:
+                        messages.info(self.request, "Shipping Address not available!")
+                        return redirect('home:checkout')
+                else:
+                    print("User is entering new Shipping Address.")
+            
+                    shipping_address1 = form.cleaned_data.get('shipping_address1')
+                    shipping_address2 = form.cleaned_data.get('shipping_address2')
+                    shipping_city = form.cleaned_data.get('shipping_city')
+                    shipping_country = form.cleaned_data.get('shipping_country')
+                    shipping_zipcode = form.cleaned_data.get('shipping_zipcode')
+                    
+                    if is_valid_form([shipping_address1,shipping_country,shipping_zipcode]):
+                        shipping_address = Address(
+                            customer=self.request.user,
+                            street_address=shipping_address1,
+                            apartment_address=shipping_address2,
+                            city=shipping_city,
+                            country=shipping_country,
+                            zipcode=shipping_zipcode,
+                            address_type='S'
+                        )
+                        shipping_address.save()
+
+                        order.shipping_address=shipping_address
+                        order.save()
+                        #if the newly created shipping address to be set as default shipping address
+                        set_default_shipping = form.cleaned_data.get('set_default_shipping')
+                        if set_default_shipping:
+                            shipping_address.default = True
+                            shipping_address.save()
+                    else:
+                        messages.warning(self.request, "Please fill in the required fields!")
+                
+                #BILLING ADDRESS   
+                use_default_billing = form.cleaned_data.get('use_default_billing')
+
+                # same_billing_address = form.cleaned_data.get('same_billing_address')
+                # if same_billing_address:
+                #     billing_address = shipping_address
+                #     billing_address.pk = None
+                #     billing_address.save()
+                #     billing_address.address_type = 'B'
+                #     billing_address.save()
+                #     order.billing_address=billing_address
+                #     order.save()
+
+                if use_default_billing:
+                    print("Using the default billing address")
+                    billing_address_qs = Address.objects.filter(customer=self.request.user, address_type='B', default=True)
+                    if billing_address_qs.exists():
+                        billing_address = billing_address_qs[0]
+                        order.billing_address=billing_address
+                        order.save()
+                    else:
+                        messages.info(self.request, "billing Address not available!")
+                        return redirect('home:checkout')
+                else:
+                    print("User is entering new billing Address.")
+            
+                    billing_address1 = form.cleaned_data.get('billing_address1')
+                    billing_address2 = form.cleaned_data.get('billing_address2')
+                    billing_city = form.cleaned_data.get('billing_city')
+                    billing_country = form.cleaned_data.get('billing_country')
+                    billing_zipcode = form.cleaned_data.get('billing_zipcode')
+                    
+                    if is_valid_form([billing_address1,billing_country,billing_zipcode]):
+                        billing_address = Address(
+                            customer=self.request.user,
+                            street_address=billing_address1,
+                            apartment_address=billing_address2,
+                            city=billing_city,
+                            country=billing_country,
+                            zipcode=billing_zipcode,
+                            address_type='B'
+                        )
+                        billing_address.save()
+
+                        order.billing_address=billing_address
+                        order.save()
+                        #if the newly created shipping address to be set as default billing address
+                        set_default_billing = form.cleaned_data.get('set_default_billing')
+                        if set_default_billing:
+                            billing_address.default = True
+                            billing_address.save()
+                    else:
+                        messages.warning(self.request, "Please fill in the required fields!")
+
+
+                    payment_option = form.cleaned_data.get('payment_option')
+
+                    if payment_option == 'P':
+                        return redirect('home:payment')
+                    elif payment_option == 'D':
+                        return redirect('home:payment')
+                    else:
+                        messages.warning(self.request, "Select a payment option")
+                        return redirect('home:checkout')
+
+                print("The form is valid")
+                return redirect('home:checkout')
+            messages.warning(self.request, "Checkout failed")
+            return redirect('home:checkout')
+
+        except ObjectDoesNotExist:
+            messages.info(self.request, "You dont have an active order")
+            return render(request, 'cart.html', self.views)
+
+# class paymentView(BaseView):
+def pay(request):
+    return render(request, 'payment.html')  
 # increase the quantity and update the total | fillup the cart infos
 # def cart(request,slug):
 #     if OrderItem.objects.filter(slug=slug, user= request.user.username).exists():

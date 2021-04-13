@@ -44,7 +44,9 @@ INSTALLED_APPS = [
     'django_filters',
     'ckeditor',
     'django_countries', #for shipping address
+    'crispy_forms',
 ]
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -174,3 +176,7 @@ CSV_EXPORT_DOUBLEQUOTE = True
 CSV_EXPORT_LINETERMINATOR = r'\n'
 CSV_EXPORT_QUOTING = 'QUOTE_ALL'
 CSV_EXPORT_FORMAT_FORM = True
+
+# AUTHENTICATION_BACKENDS = (
+#     ('django.contrib.auth.backends.ModelBackend'),
+# )
