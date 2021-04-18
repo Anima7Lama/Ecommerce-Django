@@ -2,6 +2,18 @@
 {% load crispy_forms_tags %}
 {% load static %}
 {% block content %}  
+
+        <!-- message alert -->
+        {% if messages %}
+        {% for message in messages %}
+        <div style="margin-top: 1rem;" class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{message}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>    
+        {% endfor %}
+        {% endif %}
         
         <!-- Breadcrumb Start -->
         <div class="breadcrumb-wrap">
@@ -28,7 +40,7 @@
                             </form>  -->
                             <form action="" method="POST">
                                 {% csrf_token %}
-                                <div class="billing-address">
+                                <div class="hideable-shipping-address">
                                     <h2>SHIPPING ADDRESS</h2>
                                     <div class="row"> 
                                         <div class="col-md-12">
@@ -75,7 +87,7 @@
                                             <div class="custom-control custom-checkbox">
                                                 <input type="checkbox" name="same_billing_address" class="custom-control-input" id="same_billing_address">
                                                 <!-- {{form.same_shipping_address}} -->
-                                                <label class="custom-control-label" for="same_billing_address">Same Shipping Address</label>
+                                                <label class="custom-control-label" for="same_billing_address">Same Billing Address</label>
                                             </div>
                                         </div>
                                         {% if default_shipping_address %}
@@ -87,22 +99,10 @@
                                             </div>
                                         </div>
                                         {% endif %}
-                                        <div class="col-md-12">
-                                            <label>Payment Option </label>
-                                            <div class="custom-control custom-radio">
-                                                <input id="debit" value="D" name="payment_option" type="radio" class="custom-control-input">
-                                                <label class="custom-control-label" for="debit">Debit Card</label>
-                                            </div>
-                                            <div class="custom-control custom-radio">
-                                                <input id="paypal" value="P" name="payment_option" type="radio" class="custom-control-input">
-                                                <label class="custom-control-label" for="paypal">Paypal</label>
-                                            </div>
-                                            <!-- {{ form.payment_option }} -->   
-                                        </div>
                                     </div>
                                 </div>
                                 <hr>
-                                <div class="billing-address">
+                                <div class="hideable-billing-address">
                                     <h2>BILLING ADDRESS</h2>
                                     <div class="row">
                                         <div class="col-md-12">
@@ -152,6 +152,18 @@
                                             </div>
                                         </div>
                                         {% endif %}
+                                        <div class="col-md-12">
+                                            <label>Payment Option </label>
+                                            <div class="custom-control custom-radio">
+                                                <input id="debit" value="D" name="payment_option" type="radio" class="custom-control-input">
+                                                <label class="custom-control-label" for="debit">Debit Card</label>
+                                            </div>
+                                            <div class="custom-control custom-radio">
+                                                <input id="paypal" value="P" name="payment_option" type="radio" class="custom-control-input">
+                                                <label class="custom-control-label" for="paypal">Paypal</label>
+                                            </div>
+                                            <!-- {{ form.payment_option }} -->   
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -180,3 +192,29 @@
         <!-- Checkout End -->
         
  {% endblock %}
+
+ {% block extra_scripts %}
+ <script>
+    var hideable_shipping_form = $('.hideable_shipping_form');
+    var hideable_billing_form = $('.hideable_billing_form');
+
+    var use_default_shipping = document.querySelector("input[name=use_default_shipping]");
+    var use_default_billing = document.querySelector("input[name=use_default_billing]");
+
+    use_default_shipping.addEventListener('change', function() {
+    if (this.checked) {
+        hideable_shipping_form.hide();
+    } else {
+        hideable_shipping_form.show();
+    }
+    })
+
+    use_default_billing.addEventListener('change', function() {
+    if (this.checked) {
+        hideable_billing_form.hide();
+    } else {
+        hideable_billing_form.show();
+    }
+    })
+ </script>
+ {% endblock extra_scripts %}

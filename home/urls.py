@@ -6,13 +6,14 @@ app_name = "home"
 urlpatterns = [
     path('', HomeView.as_view(), name='home'), # HomeView = class name, .as_view() = indictaes a classview
     path('product-detail/<slug>', productDetailView.as_view(), name='product-detail'),
+    # path('product-detail/<slug>/reviews', comment, name='reviews'),
     path('contact', contact, name='contact'),
     path('my-account', myAccount, name='myAccount'),
     path('product-list', ProductList.as_view(), name='productList'),
 
     path('search', searchView.as_view(), name = 'search'),
     path('category/<slug>', categoryView.as_view(), name = 'category'),
-    # path('brand/<name>', BrandView.as_view(), name = 'brand'),
+    #  path('brand/<name>', BrandView.as_view(), name = 'brand'),
     path('signup', register, name = 'signup'),
     path('signin', login, name = 'signin'),
     path('mycart', cartView.as_view(), name = 'mycart'),

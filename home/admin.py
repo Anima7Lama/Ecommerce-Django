@@ -3,6 +3,8 @@ from .models import *
 from csvexport.actions import csvexport
 
 #customizing admin panel
+admin.site.site_header = "Thangka Center"
+admin.site.index_title = "Welcome to Thangka Center Admin Panel."
 class item(admin.ModelAdmin):
     list_display = ("title","item_code","price","discounted_price","category","label","image")
     search_fields = ["title","description"]
@@ -46,6 +48,7 @@ class AddressAdmin(admin.ModelAdmin):
 
 # Register your models here.
 admin.site.register(Item, item)
+admin.site.register(ProductComment)
 admin.site.register(Category, category)
 admin.site.register(Ad)
 # admin.site.register(Brand)

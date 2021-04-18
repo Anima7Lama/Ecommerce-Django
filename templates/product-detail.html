@@ -86,7 +86,7 @@
                                         <a class="nav-link" data-toggle="pill" href="#specification">Specification</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" data-toggle="pill" href="#reviews">Reviews (1)</a>
+                                        <a class="nav-link" data-toggle="pill" href="#reviews">Reviews ({{comments.count}})</a>
                                     </li>
                                 </ul>
 
@@ -109,43 +109,41 @@
                                         </ul>
                                     </div>
                                     <div id="reviews" class="container tab-pane fade">
+                                        <div class="reviews-submit">
+                                            <form method="POST" action="">
+                                                {% csrf_token %}
+                                                
+                                                <h4>Your Review:</h4>
+                                                <!-- {{ comment_form.as_p }}
+                                                <button class="btn" value="submit" type="submit">Comment</button> -->
+                                                <div class="row form">
+                                                    <div class="col-sm-10">
+                                                        <!-- {{ form.as_p }} -->
+                                                        <!-- <textarea name="comment" id= "comment" class="form-control" rows="2" placeholder="Type in your review..."></textarea> -->
+                                                        {{ form.comment }}
+                                                        
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <button class="btn" value="Submit" type="submit">Comment</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <hr>
+                                        {% if comments == None %}
+                                        <p>No Reviews yet!</p>
+                                        <hr>
+                                        {% else %}
+                                        {% for comm in comments %}
                                         <div class="reviews-submitted">
-                                            <div class="reviewer">Phasellus Gravida - <span>01 Jan 2020</span></div>
-                                            <div class="ratting">
-                                                <i class="fa fa-star"></i>
-                                                <i class="fa fa-star"></i>
-                                                <i class="fa fa-star"></i>
-                                                <i class="fa fa-star"></i>
-                                                <i class="fa fa-star"></i>
-                                            </div>
+                                            <div class="reviewer">{{comm.user}} - <span>{{comm.timestamp}}</span></div>
                                             <p>
-                                                Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.
+                                                {{comm.comment}}
                                             </p>
                                         </div>
-                                        <div class="reviews-submit">
-                                            <h4>Give your Review:</h4>
-                                            <div class="ratting">
-                                                <i class="far fa-star"></i>
-                                                <i class="far fa-star"></i>
-                                                <i class="far fa-star"></i>
-                                                <i class="far fa-star"></i>
-                                                <i class="far fa-star"></i>
-                                            </div>
-                                            <div class="row form">
-                                                <div class="col-sm-6">
-                                                    <input type="text" placeholder="Name">
-                                                </div>
-                                                <div class="col-sm-6">
-                                                    <input type="email" placeholder="Email">
-                                                </div>
-                                                <div class="col-sm-12">
-                                                    <textarea placeholder="Review"></textarea>
-                                                </div>
-                                                <div class="col-sm-12">
-                                                    <button>Submit</button>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <hr>
+                                        {% endfor %}
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>

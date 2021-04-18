@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Category, Slider, Ad, Item, OrderItem, Order, Address, Contact
+from .models import Category, Slider, Ad, Item, OrderItem, Order, Address, Contact, ProductComment
 from django.utils import timezone
-from .forms import AddressForm
+from .forms import AddressForm, CommentForm
 
 # Create your views here.
 from django.views.generic.base import View
@@ -46,9 +46,32 @@ class productDetailView(BaseView):
         self.views['related_items'] = Item.objects.filter(category=category)
         self.views['item_detail'] = Item.objects.filter(slug = slug)
         self.views['categories'] = Category.objects.all()
-        # self.views['brands'] = Brand.objects.all()
-        return render(request, 'product-detail.html',self.views)
+        form = CommentForm()
+        self.views['form'] = form
+        item = Item.objects.get(slug=slug)
+        self.views['comments'] = ProductComment.objects.filter(product=item)
 
+        return render(request, 'product-detail.html',self.views)
+    
+    def post(self, request, slug):
+        item = Item.objects.get(slug=slug)
+        if request.method =='POST':
+            form = CommentForm(request.POST or None)
+            if form.is_valid():
+                comment = form.cleaned_data['comment']
+            
+                data = ProductComment.objects.create(
+                    comment = comment,
+                    user = request.user,
+                    product = item,
+                )
+                # print(data)
+                data.save()
+                messages.success(request, "Your review has been posted.")
+        else:
+            form = CommentForm()
+        return redirect('home:product-detail', item.slug)
+        
 class searchView(BaseView):
     def get(self,request):
         query = request.GET.get('query',None) #get function takes the query value from the form
@@ -273,18 +296,17 @@ class checkoutView(BaseView):
                 #BILLING ADDRESS   
                 use_default_billing = form.cleaned_data.get('use_default_billing')
 
-                # same_billing_address = form.cleaned_data.get('same_billing_address')
-                # if same_billing_address:
-                #     billing_address = shipping_address
-                #     billing_address.pk = None
-                #     billing_address.save()
-                #     billing_address.address_type = 'B'
-                #     billing_address.save()
-                #     order.billing_address=billing_address
-                #     order.save()
+                same_billing_address = form.cleaned_data.get('same_billing_address')
+                if same_billing_address:
+                    billing_address = shipping_address
+                    billing_address.pk = None
+                    billing_address.save()
+                    billing_address.address_type = 'B'
+                    billing_address.save()
+                    order.billing_address=billing_address
+                    order.save()
 
-                if use_default_billing:
-                    print("Using the default billing address")
+                elif use_default_billing:
                     billing_address_qs = Address.objects.filter(customer=self.request.user, address_type='B', default=True)
                     if billing_address_qs.exists():
                         billing_address = billing_address_qs[0]
@@ -294,8 +316,7 @@ class checkoutView(BaseView):
                         messages.info(self.request, "billing Address not available!")
                         return redirect('home:checkout')
                 else:
-                    print("User is entering new billing Address.")
-            
+                    #entering new billing Address           
                     billing_address1 = form.cleaned_data.get('billing_address1')
                     billing_address2 = form.cleaned_data.get('billing_address2')
                     billing_city = form.cleaned_data.get('billing_city')
@@ -346,73 +367,7 @@ class checkoutView(BaseView):
 
 # class paymentView(BaseView):
 def pay(request):
-    return render(request, 'payment.html')  
-# increase the quantity and update the total | fillup the cart infos
-# def cart(request,slug):
-#     if OrderItem.objects.filter(slug=slug, user= request.user.username).exists():
-#         quantity = OrderItem.objects.get(slug=slug, user= request.user.username).quantity
-#         quantity = quantity +1
-#         price = Item.objects.get(slug=slug).price
-#         discounted_price = Item.objects.get(slug=slug).discounted_price
-#         if discounted_price > 0:
-#             total = quantity*discounted_price
-#             OrderItem.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity)
-#         else:
-#             total = quantity*price
-#         OrderItem.objects.filter(slug=slug, user= request.user.username).update(quantity = quantity, total = total)
-    
-#     else:
-#         price = Item.objects.get(slug=slug).price
-#         discounted_price = Item.objects.get(slug=slug).discounted_price
-#         if discounted_price > 0:
-#             total = discounted_price
-#         else:
-#             total = price
-#         data = OrderItem.objects.create(
-#             user = request.user.username,
-#             slug = slug,
-#             item = Item.objects.filter(slug=slug)[0], # [0] = the first element inside the list
-#             total = total
-#         )
-#         data.save()
-#     return redirect('home:mycart')
-
-# class cartSummaryView(BaseView):
-#     def get(self, request):
-#         self.views['Total'] = Order.objects.filter(customer = request.user, ordered=False)
-        
-#         return render(request, 'cart.html', self.views)
-
-# def totalCart(request):
-#     subtotal = 0
-#     if Order.objects.filter(customer= request.user.username).exists():
-#         items = Order.objects.get(customer= request.user.username).items.all()
-#         for item in items:
-#             subtotal = sum(item.total)
-#             data = Order.objects.create(
-#                 customer = request.user.username,
-#                 items = OrderItem.objects.filter(customer= request.user.username).item, # [0] = the first element inside the list
-#                 subtotal = subtotal
-#             )
-#             data.save()
-#         return redirect('home:mycart')
-
-#reduce quantity and update the total
-# def deleteSingleCart(request,slug):
-#     if OrderItem.objects.filter(slug=slug, customer= request.user).exists():
-#         quantity = OrderItem.objects.get(slug=slug, customer= request.user).quantity
-#         quantity = quantity -1
-#         price = Item.objects.get(slug=slug).price
-#         discounted_price = Item.objects.get(slug=slug).discounted_price
-#         if discounted_price > 0:
-#             total = quantity*discounted_price
-#             OrderItem.objects.filter(slug=slug, customer= request.user).update(quantity = quantity)
-#         else:
-#             total = quantity*price
-#         OrderItem.objects.filter(slug=slug, customer= request.user).update(quantity = quantity, total = total)
-
-#         return redirect('home:mycart')
-
+    return render(request, 'payment.html')
 
 # class BrandView(BaseView):
 #     def get(self,request,name):

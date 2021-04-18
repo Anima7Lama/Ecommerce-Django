@@ -7,6 +7,7 @@ from django_countries.fields import CountryField
 from django.contrib.auth.models import User
 from django.urls import reverse
 from ckeditor.fields import RichTextField
+from django.utils.timezone import now
 
 # Create your models here.
 class Category(models.Model):
@@ -72,16 +73,16 @@ class Item(models.Model):
     def get_cart_url(self):
         return reverse("home:add-to-cart", kwargs={'slug':self.slug}) # slug value is in item, so the function is made in item model.
 
-# class Customer(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
-#     first_name = models.CharField(max_length=300, null=True)
-#     last_name = models.CharField(max_length=300, null=True)
-#     email = models.EmailField(max_length=300, null=True)
-#     phone_number = models.CharField(max_length=100, null=True)
+class ProductComment(models.Model):
+    sn = models.AutoField(primary_key=True)
+    comment = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Item, related_name='comments', on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True) #self = recursive
+    timestamp = models.DateTimeField(default=now)
 
-#     def __str__(self):
-#         return self.first_name
-
+    def __str__(self):
+        return f"{self.product.title} [{self.user}]"
 
 class OrderItem(models.Model):
     slug = models.CharField(max_length=200, blank=True, null=True)
