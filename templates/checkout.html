@@ -136,19 +136,20 @@
                                                 <label class="custom-control-label" for="save_info">Save Info</label>
                                             </div>
                                         </div> -->
-                                        <div class="col-md-12">
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" name="set_default_billing" class="custom-control-input" id="set_default_billing">
-                                                <!-- {{form.save_info}} -->
-                                                <label class="custom-control-label" for="set_default_billing">Save as default billing Address</label>
-                                            </div>
-                                        </div>
                                         {% if default_billing_address%}
                                         <div class="col-md-12">
                                             <div class="custom-control custom-checkbox">
                                                 <input type="checkbox" name="use_default_billing" class="custom-control-input" id="use_default_billing">
                                                 <!-- {{form.same_billing_address}} -->
                                                 <label class="custom-control-label" for="use_default_billing">Use default billing Address: {{ default_billing_address.street_address|truncatechars:10 }}</label>
+                                            </div>
+                                        </div>
+                                        {% else %}
+                                        <div class="col-md-12">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" name="set_default_billing" class="custom-control-input" id="set_default_billing">
+                                                <!-- {{form.save_info}} -->
+                                                <label class="custom-control-label" for="set_default_billing">Save as default billing Address</label>
                                             </div>
                                         </div>
                                         {% endif %}
